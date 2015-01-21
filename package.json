@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/pebble/push-queue",
   "dependencies": {
-    "aws-sdk": "^2.1.7"
+    "aws-sdk": "^2.1.7",
+    "dotenv": "^0.4.0"
   }
 }
