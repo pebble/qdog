@@ -20,5 +20,8 @@
     "aws-sdk": "^2.1.7",
     "dotenv": "^0.4.0",
     "es6-promise": "^2.0.1"
+  },
+  "devDependencies": {
+    "mocha": "^2.1.0"
   }
 }
