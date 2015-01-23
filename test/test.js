@@ -3,6 +3,7 @@
 require('dotenv').load();
 
 var assert = require('assert');
+var expect = require('expect');
 var PushQueue = require('../main.js');
 
 
@@ -32,15 +33,17 @@ describe('PushQueue', function(){
       });
     });
 
-    it('should publish the values to the SQS queue', function(done){
-     assert.doesNotThrow(function(){
-        PushQueue.post({test: "things"})
-            .then(function(data){
-              console.log(data);
-              done();
-            });
-        });
-     });
+    // Pending test
+
+    //it('should publish the values to the SQS queue', function(done){
+    // assert.doesNotThrow(function(){
+    //    PushQueue.post({test: "things"})
+    //        .then(function(data){
+    //          expect(data)
+    //          done();
+    //        });
+    //    });
+    // });
 
 
   });
