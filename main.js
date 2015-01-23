@@ -1,5 +1,14 @@
 'use strict';
 
+// validate our environment variables
+require('sanity').check([
+  'ACCESS_KEY_ID'
+, 'SECRET_ACCESS_KEY'
+, 'REGION'
+, 'SQS_QUEUE_URL'
+])
+
+
 require('dotenv').load();
 var Promise = require('es6-promise').Promise;
 var AWS = require('aws-sdk');
@@ -24,14 +33,42 @@ var params =
   };
 
 
-exports.post = function(message) {
-  return new Promise( function(resolve, reject) {
+var _toJSONString = function(input) {
+  var inputError = new Error('Error: Invalid Input. Please supply a JSON string or JSON serializable object');
 
-    var params =
-    { MessageBody: message
+  if(input === null) {
+    throw inputError;
+  }
+
+  if (typeof input === 'string') {
+    try {
+      JSON.parse(input);
+      return input;
+    }
+    catch(e) {
+      throw inputError;
+    }
+  }
+
+  if(typeof input === 'object') {
+    try {
+      return JSON.stringify(input);
+    } catch(e){
+     throw inputError;
+    }
+  }
+
+  throw inputError;
+}
+
+exports.post = function(message) {
+
+  var params =
+    { MessageBody: _toJSONString(message)
     , QueueUrl: process.env.SQS_QUEUE_URL
     };
 
+  return new Promise( function(resolve, reject) {
     sqs.sendMessage(params, function(err, data) {
       if (err) {
         reject(err)
@@ -39,14 +76,10 @@ exports.post = function(message) {
       }
       else {
         resolve(data)
-        console.log(data);
       }
     });
   });
 }
-
-exports.post(JSON.stringify({test: 'things', and: 'others'}));
-
 
 exports.receive = function() {
   return new Promise( function(resolve, reject) {
@@ -97,11 +130,3 @@ exports.delete = function(id) {
   });
 }
 
-
-// OUTSIDE
-
-
-exports.receiveMessage().then(function(data){
-  // doo some stuff with message
-
-});
