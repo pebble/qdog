@@ -1,7 +1,5 @@
 'use strict';
 
-require('dotenv').load();
-
 var assert = require('assert');
 var expect = require('expect');
 var PushQueue = require('../../main.js');

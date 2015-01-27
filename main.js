@@ -1,15 +1,15 @@
 'use strict';
 
+require('dotenv').load();
+
 // validate our environment variables
 require('sanity').check([
   'ACCESS_KEY_ID'
 , 'SECRET_ACCESS_KEY'
 , 'REGION'
 , 'SQS_QUEUE_URL'
-])
+]);
 
-
-require('dotenv').load();
 var Promise = require('es6-promise').Promise;
 var AWS = require('aws-sdk');
 var sqs;
