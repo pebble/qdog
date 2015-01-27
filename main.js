@@ -130,3 +130,7 @@ exports.delete = function(id) {
   });
 }
 
+// Test stuff below
+
+exports.sqs = sqs;
+

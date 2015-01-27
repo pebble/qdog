@@ -1,10 +1,8 @@
 'use strict';
 
-require('dotenv').load();
-
 var assert = require('assert');
 var expect = require('expect');
-var PushQueue = require('../main.js');
+var PushQueue = require('../../main.js');
 
 
 describe('PushQueue', function(){
@@ -32,19 +30,6 @@ describe('PushQueue', function(){
         });
       });
     });
-
-    // Pending test
-
-    //it('should publish the values to the SQS queue', function(done){
-    // assert.doesNotThrow(function(){
-    //    PushQueue.post({test: "things"})
-    //        .then(function(data){
-    //          expect(data)
-    //          done();
-    //        });
-    //    });
-    // });
-
 
   });
 });
