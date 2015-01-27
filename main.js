@@ -82,7 +82,7 @@ exports.post = function(message) {
 }
 
 exports.receive = function() {
-  return new Promise( function(resolve, reject) {
+  return new Promise(function PromiseCallback(resolve, reject) {
     var params =
       { QueueUrl: process.env.SQS_QUEUE_URL /* required */
       , AttributeNames: ['All']
@@ -90,9 +90,10 @@ exports.receive = function() {
       , WaitTimeSeconds: 20
       };
 
-    sqs.receiveMessage(params, function(err, data) {
-      if (err) {
-        console.log(err, err.stack);
+    sqs.receiveMessage(params, function receiveMessageCallback(err, data) {
+      console.log(arguments);
+      if (err || !data.Messages) {
+        console.log(err);
         reject(err);
       }
       else { // success
@@ -116,7 +117,7 @@ exports.delete = function(id) {
       };
 
     sqs.deleteMessage(params, function(err, data) {
-      if (err){
+      if (err) {
         console.log(err, err.stack);
         reject(err);
       }
