@@ -91,10 +91,12 @@ exports.receive = function() {
       };
 
     sqs.receiveMessage(params, function receiveMessageCallback(err, data) {
-      console.log(arguments);
-      if (err || !data.Messages) {
+      if (err) {
         console.log(err);
         reject(err);
+      }
+      else if(!data.Messages) {
+        reject();
       }
       else { // success
         resolve(
