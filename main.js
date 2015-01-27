@@ -99,8 +99,8 @@ exports.receive = function() {
         console.log(data);
 
         resolve(
-          { id: data[0].ReceiptHandle
-          , body: data[0].Body
+          { id: data.Messages[0].ReceiptHandle
+          , body: data.Messages[0].Body
           }
         );
       }
