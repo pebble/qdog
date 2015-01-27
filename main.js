@@ -96,8 +96,6 @@ exports.receive = function() {
         reject(err);
       }
       else { // success
-        console.log(data);
-
         resolve(
           { id: data.Messages[0].ReceiptHandle
           , body: data.Messages[0].Body
