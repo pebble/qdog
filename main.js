@@ -68,7 +68,7 @@ PushQueue.prototype.receive = function() {
 
   return new Promise(function PromiseCallback(resolve, reject) {
     var params =
-      { QueueUrl: process.env.SQS_QUEUE_URL /* required */
+      { QueueUrl: this.config.queueUrl /* required */
       , AttributeNames: ['All']
       , MaxNumberOfMessages: 1
       , WaitTimeSeconds: 20
@@ -107,7 +107,7 @@ PushQueue.prototype.delete = function(id) {
 
   return new Promise( function(resolve, reject) {
     var params =
-      { QueueUrl: process.env.SQS_QUEUE_URL
+      { QueueUrl: this.config.queueUrl
       , ReceiptHandle: id
       };
 
