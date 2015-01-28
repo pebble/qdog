@@ -11,7 +11,7 @@ describe('PushQueue', function(){
     assert.doesNotThrow(function(){
       PushQueue.post({test: "things"})
         .then(function(data){
-          expect(data)
+          expect(data);
           done();
         });
       });
@@ -23,7 +23,7 @@ describe('PushQueue', function(){
     assert.doesNotThrow(function(){
       PushQueue.post({test: "things"})
         .then(function(data){
-          expect(data)
+          expect(data);
           done();
         });
       });

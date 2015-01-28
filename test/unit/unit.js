@@ -3,7 +3,11 @@
 var assert = require('assert');
 var expect = require('expect');
 var PushQueue = require('../../main.js');
+var sinon = require('sinon');
+var Promise = require('es6-promise').Promise;
 
+// stub out AWS SQS SDK
+var sqsSendMessageStub = sinon.stub(PushQueue.sqs, 'sendMessage');
 
 describe('PushQueue', function(){
   describe('#post()', function(){
@@ -15,6 +19,7 @@ describe('PushQueue', function(){
       ].forEach(function(badvalue){
         assert.throws(function(){
           PushQueue.post(badvalue);
+
         });
       });
     });
@@ -28,8 +33,48 @@ describe('PushQueue', function(){
         assert.doesNotThrow(function(){
           PushQueue.post(goodvalue);
         });
+
       });
     });
+
+    it('should return a promise', function(){
+      assert(PushQueue.post({good: "object"}) instanceof Promise);
+    });
+
+
+    it('should resolve the promise after success', function(done){
+      var successData = {success: 'data'};
+
+      sqsSendMessageStub.callsArgWith(1, null, successData);
+
+      PushQueue.post({some: 'message'})
+        .then(function(data){
+          assert.equal(data, successData);
+          done();
+        })
+        .catch(function(){
+          done("Expected resolve, Got reject");
+        });
+    });
+
+    it('should reject the promise after failure', function(done){
+      var errorData = {error: 'data'};
+
+      sqsSendMessageStub.callsArgWith(1, errorData, null);
+
+      PushQueue.post({some: 'message'})
+        .then(function(){
+          done("Expected reject, Got resolve");
+        })
+        .catch(function(data){
+          assert.equal(data, errorData);
+          done();
+        });
+    });
+
+    after(function(){
+      PushQueue.sqs.sendMessage.restore();
+    })
 
   });
 });

@@ -12,7 +12,6 @@ require('sanity').check([
 
 var Promise = require('es6-promise').Promise;
 var AWS = require('aws-sdk');
-var sqs;
 
 // Load credentials from local json file
 AWS.config = new AWS.Config(
@@ -25,13 +24,7 @@ AWS.config = new AWS.Config(
 
 
 // Instantiate SQS client
-sqs = new AWS.SQS();
-
-var params =
-  { QueueUrl: process.env.SQS_QUEUE_URL
-  , AttributeNames: ['All']
-  };
-
+var sqs = new AWS.SQS();
 
 var _toJSONString = function(input) {
   var inputError = new Error('Error: Invalid Input. Please supply a JSON string or JSON serializable object');
@@ -68,14 +61,13 @@ exports.post = function(message) {
     , QueueUrl: process.env.SQS_QUEUE_URL
     };
 
-  return new Promise( function(resolve, reject) {
+  return new Promise(function postPromise(resolve, reject) {
     sqs.sendMessage(params, function(err, data) {
       if (err) {
-        reject(err)
-        console.log(err, err.stack);
+        reject(err);
       }
       else {
-        resolve(data)
+        resolve(data);
       }
     });
   });
@@ -92,7 +84,6 @@ exports.receive = function() {
 
     sqs.receiveMessage(params, function receiveMessageCallback(err, data) {
       if (err) {
-        console.log(err);
         reject(err);
       }
       else if(!data.Messages) {
