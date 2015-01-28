@@ -90,7 +90,9 @@ exports.receive = function() {
         reject();
       }
       else { // success
+
         try {
+
           resolve(
             { id: data.Messages[0].ReceiptHandle
             , body: JSON.parse(data.Messages[0].Body)
@@ -98,7 +100,7 @@ exports.receive = function() {
           );
         }
         catch(e) {
-          throw new Error('Could not parse returned message');
+          reject("Malformed JSON in response message")
         }
       }
     });

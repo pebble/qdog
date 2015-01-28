@@ -106,19 +106,21 @@ describe('PushQueue', function(){
 
     promiseTest('receive', stub, inputData, resolveData, {error: 'data'});
 
-    // not sure why thios is not working
-    //it('should throw for malformed message data', function(done){
-    //
-    //  inputData.Messages[0].Body = 'bad {JSON';
-    //  stub.callsArgWith(1, null, inputData);
-    //
-    //  assert.throws(function(){
-    //    PushQueue.receive()
-    //      .then(function(){
-    //      });
-    //  });
-    //
-    //})
+    it('should reject for malformed message data', function(done){
+
+      inputData.Messages[0].Body = 'bad {JSON';
+      stub.callsArgWith(1, null, inputData);
+
+      PushQueue.receive()
+        .then(function(){
+          done("Expected reject, Got resolve");
+        })
+        .catch(function(data){
+          assert.equal(data, "Malformed JSON in response message");
+          done();
+        });
+
+    })
 
     after(function(){
       PushQueue.sqs.receiveMessage.restore();
