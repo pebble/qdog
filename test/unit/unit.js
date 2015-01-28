@@ -6,18 +6,20 @@ var PushQueue = require('../../main.js');
 var sinon = require('sinon');
 var Promise = require('es6-promise').Promise;
 
+// empty config because all the SQS stuff gets stubbed out anyway
+var pushQueue = new PushQueue({});
 
 var promiseTest = function(method, stub, inputData, resolveData, errorData) {
 
   it('should return a promise', function(){
-    assert(PushQueue[method]({good: "object"}) instanceof Promise);
+    assert(pushQueue[method]({good: "object"}) instanceof Promise);
   });
 
   it('should resolve the promise after success', function(done){
 
     stub.callsArgWith(1, null, inputData);
 
-    PushQueue[method]({some: 'message'})
+    pushQueue[method]({some: 'message'})
       .then(function(data){
         assert.deepEqual(data, resolveData);
         done();
@@ -31,7 +33,7 @@ var promiseTest = function(method, stub, inputData, resolveData, errorData) {
 
     stub.callsArgWith(1, errorData, null);
 
-    PushQueue[method]({some: 'message'})
+    pushQueue[method]({some: 'message'})
       .then(function(){
         done("Expected reject, Got resolve");
       })
@@ -45,9 +47,9 @@ var promiseTest = function(method, stub, inputData, resolveData, errorData) {
 
 // -----------------------------------------------------------------------------
 
-describe('PushQueue', function(){
-  var stub = sinon.stub(PushQueue.sqs, 'sendMessage');
+describe('pushQueue', function(){
   // stub out AWS SQS SDK
+  var stub = sinon.stub(pushQueue.sqs, 'sendMessage');
 
   describe('#post()', function(){
     it('should throw if JSON serializable things are not supplied', function(){
@@ -57,7 +59,7 @@ describe('PushQueue', function(){
       , function(){}
       ].forEach(function(badvalue){
         assert.throws(function(){
-          PushQueue.post(badvalue);
+          pushQueue.post(badvalue);
         });
       });
     });
@@ -69,7 +71,7 @@ describe('PushQueue', function(){
       , '["string", "array"]'
       ].forEach(function(goodvalue){
         assert.doesNotThrow(function(){
-          PushQueue.post(goodvalue);
+          pushQueue.post(goodvalue);
         });
       });
     });
@@ -79,7 +81,7 @@ describe('PushQueue', function(){
     promiseTest('post', stub, resolveData, resolveData, {error: 'data'});
 
     after(function(){
-      PushQueue.sqs.sendMessage.restore();
+      pushQueue.sqs.sendMessage.restore();
     })
 
   });
@@ -88,7 +90,7 @@ describe('PushQueue', function(){
 
   describe('#receive()', function(){
 
-    var stub = sinon.stub(PushQueue.sqs, 'receiveMessage');
+    var stub = sinon.stub(pushQueue.sqs, 'receiveMessage');
 
     var inputData =
     { Messages:
@@ -111,7 +113,7 @@ describe('PushQueue', function(){
       inputData.Messages[0].Body = 'bad {JSON';
       stub.callsArgWith(1, null, inputData);
 
-      PushQueue.receive()
+      pushQueue.receive()
         .then(function(){
           done("Expected reject, Got resolve");
         })
@@ -123,19 +125,19 @@ describe('PushQueue', function(){
     })
 
     after(function(){
-      PushQueue.sqs.receiveMessage.restore();
+      pushQueue.sqs.receiveMessage.restore();
     })
 
   });
 
   describe('#delete()', function(){
 
-    var stub = sinon.stub(PushQueue.sqs, 'deleteMessage');
+    var stub = sinon.stub(pushQueue.sqs, 'deleteMessage');
 
     promiseTest('delete', stub, 'abc1234', undefined, {error: 'data'});
 
     after(function(){
-      PushQueue.sqs.deleteMessage.restore();
+      pushQueue.sqs.deleteMessage.restore();
     })
 
   });

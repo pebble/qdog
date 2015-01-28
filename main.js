@@ -1,30 +1,7 @@
 'use strict';
 
-require('dotenv').load();
-
-// validate our environment variables
-require('sanity').check([
-  'ACCESS_KEY_ID'
-, 'SECRET_ACCESS_KEY'
-, 'REGION'
-, 'SQS_QUEUE_URL'
-]);
-
 var Promise = require('es6-promise').Promise;
 var AWS = require('aws-sdk');
-
-// Load credentials from local json file
-AWS.config = new AWS.Config(
-  { accessKeyId: process.env.ACCESS_KEY_ID
-  , secretAccessKey: process.env.SECRET_ACCESS_KEY
-  , region: process.env.REGION
-  , apiVersions: { sqs: '2012-11-05' }
-  }
-)
-
-
-// Instantiate SQS client
-var sqs = new AWS.SQS();
 
 var _toJSONString = function(input) {
   var inputError = new Error('Error: Invalid Input. Please supply a JSON string or JSON serializable object');
@@ -54,14 +31,28 @@ var _toJSONString = function(input) {
   throw inputError;
 }
 
-exports.post = function(message) {
+var PushQueue = module.exports = function(config) {
+  // Instantiate SQS client
+  this.config = config;
+
+  this.sqs = new AWS.SQS(
+    { accessKeyId: this.config.accessKeyId
+    , secretAccessKey: this.config.secretAccessKey
+    , region: this.config.region
+    , apiVersions: { sqs: '2012-11-05' }
+    });
+}
+
+
+PushQueue.prototype.post = function(message) {
+  var _this = this;
   var params =
     { MessageBody: _toJSONString(message)
-    , QueueUrl: process.env.SQS_QUEUE_URL
+    , QueueUrl: this.config.queueUrl
     };
 
   return new Promise(function postPromise(resolve, reject) {
-    sqs.sendMessage(params, function(err, data) {
+    _this.sqs.sendMessage(params, function(err, data) {
       if (err) {
         reject(err);
       }
@@ -72,7 +63,9 @@ exports.post = function(message) {
   });
 }
 
-exports.receive = function() {
+PushQueue.prototype.receive = function() {
+  var _this = this;
+
   return new Promise(function PromiseCallback(resolve, reject) {
     var params =
       { QueueUrl: process.env.SQS_QUEUE_URL /* required */
@@ -81,7 +74,7 @@ exports.receive = function() {
       , WaitTimeSeconds: 20
       };
 
-    sqs.receiveMessage(params, function receiveMessageCallback(err, data) {
+    _this.sqs.receiveMessage(params, function receiveMessageCallback(err, data) {
 
       if (err) {
         reject(err);
@@ -109,14 +102,16 @@ exports.receive = function() {
 }
 
 
-exports.delete = function(id) {
+PushQueue.prototype.delete = function(id) {
+  var _this = this;
+
   return new Promise( function(resolve, reject) {
     var params =
       { QueueUrl: process.env.SQS_QUEUE_URL
       , ReceiptHandle: id
       };
 
-    sqs.deleteMessage(params, function(err, data) {
+    _this.sqs.deleteMessage(params, function deleteCallback(err, data) {
       if (err) {
         reject(err);
       }
@@ -126,8 +121,4 @@ exports.delete = function(id) {
     });
   });
 }
-
-// Test stuff below
-
-exports.sqs = sqs;
 
