@@ -55,7 +55,6 @@ var _toJSONString = function(input) {
 }
 
 exports.post = function(message) {
-
   var params =
     { MessageBody: _toJSONString(message)
     , QueueUrl: process.env.SQS_QUEUE_URL
@@ -83,6 +82,7 @@ exports.receive = function() {
       };
 
     sqs.receiveMessage(params, function receiveMessageCallback(err, data) {
+
       if (err) {
         reject(err);
       }
@@ -90,11 +90,16 @@ exports.receive = function() {
         reject();
       }
       else { // success
-        resolve(
-          { id: data.Messages[0].ReceiptHandle
-          , body: data.Messages[0].Body
-          }
-        );
+        try {
+          resolve(
+            { id: data.Messages[0].ReceiptHandle
+            , body: JSON.parse(data.Messages[0].Body)
+            }
+          );
+        }
+        catch(e) {
+          throw new Error('Could not parse returned message');
+        }
       }
     });
 
@@ -111,11 +116,9 @@ exports.delete = function(id) {
 
     sqs.deleteMessage(params, function(err, data) {
       if (err) {
-        console.log(err, err.stack);
         reject(err);
       }
       else {
-        console.log(data);
         resolve();
       }
     });

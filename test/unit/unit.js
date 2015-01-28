@@ -6,10 +6,49 @@ var PushQueue = require('../../main.js');
 var sinon = require('sinon');
 var Promise = require('es6-promise').Promise;
 
-// stub out AWS SQS SDK
-var sqsSendMessageStub = sinon.stub(PushQueue.sqs, 'sendMessage');
+
+var promiseTest = function(method, stub, inputData, resolveData, errorData) {
+
+  it('should return a promise', function(){
+    assert(PushQueue[method]({good: "object"}) instanceof Promise);
+  });
+
+  it('should resolve the promise after success', function(done){
+
+    stub.callsArgWith(1, null, inputData);
+
+    PushQueue[method]({some: 'message'})
+      .then(function(data){
+        assert.deepEqual(data, resolveData);
+        done();
+      })
+      .catch(function(){
+        done("Expected resolve, Got reject");
+      });
+  });
+
+  it('should reject the promise after failure', function(done){
+
+    stub.callsArgWith(1, errorData, null);
+
+    PushQueue[method]({some: 'message'})
+      .then(function(){
+        done("Expected reject, Got resolve");
+      })
+      .catch(function(data){
+        assert.deepEqual(data, errorData);
+        done();
+      });
+  });
+
+}
+
+// -----------------------------------------------------------------------------
 
 describe('PushQueue', function(){
+  var stub = sinon.stub(PushQueue.sqs, 'sendMessage');
+  // stub out AWS SQS SDK
+
   describe('#post()', function(){
     it('should throw if JSON serializable things are not supplied', function(){
       [ 1234
@@ -19,7 +58,6 @@ describe('PushQueue', function(){
       ].forEach(function(badvalue){
         assert.throws(function(){
           PushQueue.post(badvalue);
-
         });
       });
     });
@@ -33,48 +71,74 @@ describe('PushQueue', function(){
         assert.doesNotThrow(function(){
           PushQueue.post(goodvalue);
         });
-
       });
     });
 
-    it('should return a promise', function(){
-      assert(PushQueue.post({good: "object"}) instanceof Promise);
-    });
+    var resolveData = {success: 'data'};
 
-
-    it('should resolve the promise after success', function(done){
-      var successData = {success: 'data'};
-
-      sqsSendMessageStub.callsArgWith(1, null, successData);
-
-      PushQueue.post({some: 'message'})
-        .then(function(data){
-          assert.equal(data, successData);
-          done();
-        })
-        .catch(function(){
-          done("Expected resolve, Got reject");
-        });
-    });
-
-    it('should reject the promise after failure', function(done){
-      var errorData = {error: 'data'};
-
-      sqsSendMessageStub.callsArgWith(1, errorData, null);
-
-      PushQueue.post({some: 'message'})
-        .then(function(){
-          done("Expected reject, Got resolve");
-        })
-        .catch(function(data){
-          assert.equal(data, errorData);
-          done();
-        });
-    });
+    promiseTest('post', stub, resolveData, resolveData, {error: 'data'});
 
     after(function(){
       PushQueue.sqs.sendMessage.restore();
     })
 
   });
+
+  // ---------------------------------------------------------------------------
+
+  describe('#receive()', function(){
+
+    var stub = sinon.stub(PushQueue.sqs, 'receiveMessage');
+
+    var inputData =
+    { Messages:
+      [
+        { ReceiptHandle : 'abc1234'
+        , Body: '{"test": "data"}'
+        }
+      ]
+    }
+
+    var resolveData =
+    { id: 'abc1234'
+    , body: {test: 'data'}
+    }
+
+    promiseTest('receive', stub, inputData, resolveData, {error: 'data'});
+
+    // not sure why thios is not working
+    //it('should throw for malformed message data', function(done){
+    //
+    //  inputData.Messages[0].Body = 'bad {JSON';
+    //  stub.callsArgWith(1, null, inputData);
+    //
+    //  assert.throws(function(){
+    //    PushQueue.receive()
+    //      .then(function(){
+    //      });
+    //  });
+    //
+    //})
+
+    after(function(){
+      PushQueue.sqs.receiveMessage.restore();
+    })
+
+  });
+
+  describe('#delete()', function(){
+
+    var stub = sinon.stub(PushQueue.sqs, 'deleteMessage');
+
+    promiseTest('delete', stub, 'abc1234', undefined, {error: 'data'});
+
+    after(function(){
+      PushQueue.sqs.deleteMessage.restore();
+    })
+
+  });
+
+
+
+
 });
