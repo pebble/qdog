@@ -58,9 +58,7 @@ describe('pushQueue', function() {
 
   describe('#post()', function() {
     it('should throw if JSON serializable things are not supplied', function() {
-      [ 1234
-      , 'some string'
-      , null
+      [ undefined
       , function() {}
       ].forEach(function(badvalue) {
           assert.throws(function() {
@@ -70,7 +68,10 @@ describe('pushQueue', function() {
     })
 
     it('should not throw if JSON serializable things are supplied', function() {
-      [ '{ "good": "strings" }'
+      [ 1234
+      , 'some string'
+      , null
+      , '{ "good": "strings" }'
       , {good: "object"}
       , ["strings", "in array"]
       , '["string", "array"]'

@@ -2,33 +2,34 @@
 
 var Promise = require('es6-promise').Promise
 var AWS = require('aws-sdk')
+var _toJSONStringInputError = new Error('Error: Invalid Input. Please supply a JSON string or JSON serializable object')
 
 var _toJSONString = function(input) {
-  var inputError = new Error('Error: Invalid Input. Please supply a JSON string or JSON serializable object')
 
-  if (input === null) {
-    throw inputError
+  if (input === undefined || typeof input === 'function' ) {
+    throw _toJSONStringInputError
   }
 
-  if (typeof input === 'string') {
+  // test if valid JSON string
+  if(typeof input === 'string') {
     try {
+      // we have a valid JSON string already
       JSON.parse(input)
       return input
     }
     catch (e) {
-      throw inputError
+      // must be a raw string value
     }
   }
 
-  if (typeof input === 'object') {
-    try {
-      return JSON.stringify(input)
-    } catch (e) {
-      throw inputError
-    }
+  // if we got this far then we must be dealing with either an object or a number
+  try {
+    return JSON.stringify(input)
+  } catch (e) {
+    throw _toJSONStringInputError
   }
 
-  throw inputError
+  throw _toJSONStringInputError
 }
 
 var PushQueue = module.exports = function(config) {
