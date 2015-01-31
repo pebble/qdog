@@ -6,13 +6,14 @@ var PushQueue = require('../../main.js')
 var sinon = require('sinon')
 var Promise = require('es6-promise').Promise
 
-// bad config because all the SQS stuff gets stubbed out anyway
-var pushQueue = new PushQueue(
-  { accessKeyId: 'none'
-  , secretAccessKey: 'none'
-  , region: 'none'
-  , queueUrl: 'none'
-  })
+var testConfig =
+  { accessKeyId : 'testAccessID'
+  , secretAccessKey : 'testSecretKey'
+  , region : 'testRegion'
+  , queueUrl : 'testQueueURL'
+  }
+
+var pushQueue = new PushQueue(testConfig)
 
 var promiseTest = function(method, stub, inputData, resolveData, errorData) {
 
@@ -53,6 +54,30 @@ var promiseTest = function(method, stub, inputData, resolveData, errorData) {
 // -----------------------------------------------------------------------------
 
 describe('pushQueue', function() {
+
+  describe('constructor', function() {
+
+    it('throws if config is incomplete', function() {
+      Object.keys(testConfig).forEach(function(key) {
+        var oldVal = testConfig[key]
+        delete testConfig[key]
+        assert.throws(function() {
+          new PushQueue(testConfig)
+        })
+        // restore old value to testConfig
+        testConfig[key] = oldVal
+      })
+    })
+
+    it('does not throw if all config keys are provided', function() {
+      assert.doesNotThrow(function() {
+        new PushQueue(testConfig)
+      })
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+
   // stub out AWS SQS SDK
   var stub = sinon.stub(pushQueue.sqs, 'sendMessage')
 

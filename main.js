@@ -34,12 +34,25 @@ var _toJSONString = function(input) {
 
 var PushQueue = module.exports = function(config) {
   // Instantiate SQS client
-  this.config = config
+  var _this = this
 
-  this.sqs = new AWS.SQS(
-    { accessKeyId: this.config.accessKeyId
-    , secretAccessKey: this.config.secretAccessKey
-    , region: this.config.region
+  _this.config = config
+
+  // validate Config
+  ;['accessKeyId'
+  , 'secretAccessKey'
+  , 'region'
+  , 'queueUrl'
+  ].forEach(function(key) {
+    if( !_this.config[key]) {
+      throw new Error('Missing config for: ' + key)
+    }
+  })
+
+  _this.sqs = new AWS.SQS(
+    { accessKeyId: _this.config.accessKeyId
+    , secretAccessKey: _this.config.secretAccessKey
+    , region: _this.config.region
     , apiVersions: {sqs: '2012-11-05'}
     })
 }
