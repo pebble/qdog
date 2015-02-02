@@ -31,7 +31,7 @@ var _toJSONString = function(input) {
   throw inputError
 }
 
-var PushQueue = module.exports = function(config) {
+var QDog = module.exports = function(config) {
   // Instantiate SQS client
   this.config = config
 
@@ -44,7 +44,7 @@ var PushQueue = module.exports = function(config) {
 }
 
 
-PushQueue.prototype.post = function(message) {
+QDog.prototype.toss = function(message) {
   var _this = this
   var params =
     { MessageBody: _toJSONString(message)
@@ -63,7 +63,7 @@ PushQueue.prototype.post = function(message) {
   })
 }
 
-PushQueue.prototype.receive = function() {
+QDog.prototype.fetch = function() {
   var _this = this
 
   return new Promise(function PromiseCallback(resolve, reject) {
@@ -100,7 +100,7 @@ PushQueue.prototype.receive = function() {
 }
 
 
-PushQueue.prototype.delete = function(id) {
+QDog.prototype.drop = function(id) {
   var _this = this
 
   return new Promise(function(resolve, reject) {

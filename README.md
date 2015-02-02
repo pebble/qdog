@@ -1,7 +1,10 @@
-# push-queue
+# qdog
 
 Module used for being a generic abstraction for various Queue backends.
 Currently only supports SQS but intended to support more in the future.
+
+Why qDog may be a bit dog biased but lets be honest, qCat.fetch() just seems
+doomed to failure, and Q-Cat ended pretty badly for RadioShack already.
 
 ## Examples
 
@@ -14,9 +17,9 @@ npm install git+https://git@github.com/pebble/push-queue.git
 
 ```js
 
-var PushQueue = require('push-queue')
+var QDog = require('qdog')
 
-pushQueue = new PushQueue(
+qDog = new QDog(
   { accessKeyId: process.env.ACCESS_KEY_ID
   , secretAccessKey: process.env.SECRET_ACCESS_KEY
   , region: process.env.REGION
@@ -25,24 +28,24 @@ pushQueue = new PushQueue(
 )
 ```
 
-### Post to Queue
+### Toss a message into the Queue
 
 ```js
-pushQueue.post({'some':'data'})
+qDog.toss({'some':'data'})
 ```
 
-### Delete from Queue
+### Drop a message no one cares about anymore.
 
 ```js
-pushQueue.delete(message.id)
+qDog.drop(message.id)
 ```
 
-### Receive single message from Queue
+### Fetch a message from the Queue
 
 ```js
-pushQueue.receive().then(function(message){
+qDog.fetch().then(function(message){
   console.log('Got:',message.body) 
-  pushQueue.delete(message.id)
+  qDog.drop(message.id)
 },function(err){
   if (err) throw err
 })
@@ -67,7 +70,7 @@ var processMessage = function(message){
   pushQueue.receive().then(processMessage,processError)
 }
 
-pushQueue.receive().then(processMessage,processError)
+qDog.fetch().then(processMessage,processError)
 
 ```
 
@@ -83,4 +86,4 @@ npm test
 
 ## License
 
-[MIT](https://github.com/pebble/push-queue/blob/master/LICENSE)
+[MIT](https://github.com/pebble/qdog/blob/master/LICENSE)

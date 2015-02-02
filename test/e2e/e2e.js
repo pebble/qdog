@@ -4,9 +4,9 @@ require('dotenv').load()
 
 var assert = require('assert')
 var expect = require('expect')
-var PushQueue = require('../../main.js')
+var QDog = require('../../main.js')
 
-var pushQueue = new PushQueue(
+var qDog = new QDog(
   { accessKeyId: process.env.ACCESS_KEY_ID
   , secretAccessKey: process.env.SECRET_ACCESS_KEY
   , region: process.env.REGION
@@ -16,16 +16,16 @@ var pushQueue = new PushQueue(
 var testData = {test: "things"}
 var messageId
 
-describe('PushQueue', function() {
-  describe('#post()', function() {
-    it('should publish an item to the SQS queue', function() {
-      return pushQueue.post(testData)
+describe('QDog', function() {
+  describe('#toss()', function() {
+    it('should toss an item into the SQS queue', function() {
+      return qDog.toss(testData)
     })
   })
 
-  describe('#receive()', function() {
-    it('should retrieve the item from the SQS queue', function(done) {
-      pushQueue.receive()
+  describe('#fetch()', function() {
+    it('should fetch the item from the SQS queue', function(done) {
+      qDog.fetch()
         .then(function(data) {
           assert(data.id)
           assert.deepEqual(data.body, testData)
@@ -35,9 +35,9 @@ describe('PushQueue', function() {
     })
   })
 
-  describe('#delete()', function() {
-    it('should delete the item from the SQS queue', function() {
-      return pushQueue.delete(messageId)
+  describe('#drop()', function() {
+    it('should drop an item from the SQS queue', function() {
+      return qDog.drop(messageId)
     })
   })
 

@@ -1,5 +1,5 @@
 {
-  "name": "push-queue",
+  "name": "qdog",
   "version": "1.0.0",
   "description": "Module used for adding and reading from SQS and eventually Redis",
   "main": "main.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pebble/push-queue.git"
+    "url": "https://github.com/pebble/qdog.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/pebble/push-queue/issues"
+    "url": "https://github.com/pebble/qdog/issues"
   },
-  "homepage": "https://github.com/pebble/push-queue",
+  "homepage": "https://github.com/pebble/qdog",
   "dependencies": {
     "aws-sdk": "^2.1.7",
     "es6-promise": "^2.0.1"

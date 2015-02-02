@@ -2,12 +2,12 @@
 
 var assert = require('assert')
 var expect = require('expect')
-var PushQueue = require('../../main.js')
+var QDog = require('../../main.js')
 var sinon = require('sinon')
 var Promise = require('es6-promise').Promise
 
 // bad config because all the SQS stuff gets stubbed out anyway
-var pushQueue = new PushQueue(
+var qDog = new QDog(
   { accessKeyId: 'none'
   , secretAccessKey: 'none'
   , region: 'none'
@@ -17,14 +17,14 @@ var pushQueue = new PushQueue(
 var promiseTest = function(method, stub, inputData, resolveData, errorData) {
 
   it('should return a promise', function() {
-    assert(pushQueue[method]({good: "object"}) instanceof Promise)
+    assert(qDog[method]({good: "object"}) instanceof Promise)
   })
 
   it('should resolve the promise after success', function(done) {
 
     stub.callsArgWith(1, null, inputData)
 
-    pushQueue[method]({some: 'message'})
+    qDog[method]({some: 'message'})
       .then(function(data) {
         assert.deepEqual(data, resolveData)
         done()
@@ -38,7 +38,7 @@ var promiseTest = function(method, stub, inputData, resolveData, errorData) {
 
     stub.callsArgWith(1, errorData, null)
 
-    pushQueue[method]({some: 'message'})
+    qDog[method]({some: 'message'})
       .then(function() {
         done("Expected reject, Got resolve")
       })
@@ -52,11 +52,11 @@ var promiseTest = function(method, stub, inputData, resolveData, errorData) {
 
 // -----------------------------------------------------------------------------
 
-describe('pushQueue', function() {
+describe('qDog', function() {
   // stub out AWS SQS SDK
-  var stub = sinon.stub(pushQueue.sqs, 'sendMessage')
+  var stub = sinon.stub(qDog.sqs, 'sendMessage')
 
-  describe('#post()', function() {
+  describe('#toss()', function() {
     it('should throw if JSON serializable things are not supplied', function() {
       [ 1234
       , 'some string'
@@ -64,7 +64,7 @@ describe('pushQueue', function() {
       , function() {}
       ].forEach(function(badvalue) {
           assert.throws(function() {
-            pushQueue.post(badvalue)
+            qDog.toss(badvalue)
           })
         })
     })
@@ -76,26 +76,26 @@ describe('pushQueue', function() {
       , '["string", "array"]'
       ].forEach(function(goodvalue) {
           assert.doesNotThrow(function() {
-            pushQueue.post(goodvalue)
+            qDog.toss(goodvalue)
           })
         })
     })
 
     var resolveData = {success: 'data'}
 
-    promiseTest('post', stub, resolveData, resolveData, {error: 'data'})
+    promiseTest('toss', stub, resolveData, resolveData, {error: 'data'})
 
     after(function() {
-      pushQueue.sqs.sendMessage.restore()
+      qDog.sqs.sendMessage.restore()
     })
 
   })
 
   // ---------------------------------------------------------------------------
 
-  describe('#receive()', function() {
+  describe('#fetch()', function() {
 
-    var stub = sinon.stub(pushQueue.sqs, 'receiveMessage')
+    var stub = sinon.stub(qDog.sqs, 'receiveMessage')
 
     var inputData =
       { Messages:
@@ -111,14 +111,14 @@ describe('pushQueue', function() {
         , body: {test: 'data'}
         }
 
-    promiseTest('receive', stub, inputData, resolveData, {error: 'data'})
+    promiseTest('fetch', stub, inputData, resolveData, {error: 'data'})
 
     it('should reject for malformed message data', function(done) {
 
       inputData.Messages[0].Body = 'bad {JSON'
       stub.callsArgWith(1, null, inputData)
 
-      pushQueue.receive()
+      qDog.fetch()
         .then(function() {
           done("Expected reject, Got resolve")
         })
@@ -130,19 +130,19 @@ describe('pushQueue', function() {
     })
 
     after(function() {
-      pushQueue.sqs.receiveMessage.restore()
+      qDog.sqs.receiveMessage.restore()
     })
 
   })
 
-  describe('#delete()', function() {
+  describe('#drop()', function() {
 
-    var stub = sinon.stub(pushQueue.sqs, 'deleteMessage')
+    var stub = sinon.stub(qDog.sqs, 'deleteMessage')
 
-    promiseTest('delete', stub, 'abc1234', undefined, {error: 'data'})
+    promiseTest('drop', stub, 'abc1234', undefined, {error: 'data'})
 
     after(function() {
-      pushQueue.sqs.deleteMessage.restore()
+      qDog.sqs.deleteMessage.restore()
     })
 
   })
