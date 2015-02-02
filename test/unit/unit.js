@@ -6,13 +6,14 @@ var QDog = require('../../main.js')
 var sinon = require('sinon')
 var Promise = require('es6-promise').Promise
 
-// bad config because all the SQS stuff gets stubbed out anyway
-var qDog = new QDog(
-  { accessKeyId: 'none'
-  , secretAccessKey: 'none'
-  , region: 'none'
-  , queueUrl: 'none'
-  })
+var testConfig =
+  { accessKeyId : 'testAccessID'
+  , secretAccessKey : 'testSecretKey'
+  , region : 'testRegion'
+  , queueUrl : 'testQueueURL'
+  }
+
+var qDog = new QDog(testConfig)
 
 var promiseTest = function(method, stub, inputData, resolveData, errorData) {
 
@@ -53,14 +54,36 @@ var promiseTest = function(method, stub, inputData, resolveData, errorData) {
 // -----------------------------------------------------------------------------
 
 describe('qDog', function() {
+
+  describe('constructor', function() {
+
+    it('throws if config is incomplete', function() {
+      Object.keys(testConfig).forEach(function(key) {
+        var oldVal = testConfig[key]
+        delete testConfig[key]
+        assert.throws(function() {
+          new QDog(testConfig)
+        })
+        // restore old value to testConfig
+        testConfig[key] = oldVal
+      })
+    })
+
+    it('does not throw if all config keys are provided', function() {
+      assert.doesNotThrow(function() {
+        new QDog(testConfig)
+      })
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+
   // stub out AWS SQS SDK
   var stub = sinon.stub(qDog.sqs, 'sendMessage')
 
   describe('#toss()', function() {
     it('should throw if JSON serializable things are not supplied', function() {
-      [ 1234
-      , 'some string'
-      , null
+      [ undefined
       , function() {}
       ].forEach(function(badvalue) {
           assert.throws(function() {
@@ -70,7 +93,10 @@ describe('qDog', function() {
     })
 
     it('should not throw if JSON serializable things are supplied', function() {
-      [ '{ "good": "strings" }'
+      [ 1234
+      , 'some string'
+      , null
+      , '{ "good": "strings" }'
       , {good: "object"}
       , ["strings", "in array"]
       , '["string", "array"]'

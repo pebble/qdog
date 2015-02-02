@@ -2,43 +2,57 @@
 
 var Promise = require('es6-promise').Promise
 var AWS = require('aws-sdk')
+var _toJSONStringInputError = new Error('Error: Invalid Input. Please supply a JSON string or JSON serializable object')
 
 var _toJSONString = function(input) {
-  var inputError = new Error('Error: Invalid Input. Please supply a JSON string or JSON serializable object')
 
-  if (input === null) {
-    throw inputError
+  if (input === undefined || typeof input === 'function' ) {
+    throw _toJSONStringInputError
   }
 
-  if (typeof input === 'string') {
+  // test if valid JSON string
+  if(typeof input === 'string') {
     try {
+      // we have a valid JSON string already
       JSON.parse(input)
       return input
     }
     catch (e) {
-      throw inputError
+      // must be a raw string value
     }
   }
 
-  if (typeof input === 'object') {
-    try {
-      return JSON.stringify(input)
-    } catch (e) {
-      throw inputError
-    }
+  // if we got this far then we must be dealing with either an object or a number
+  try {
+    return JSON.stringify(input)
+  } catch (e) {
+    throw _toJSONStringInputError
   }
 
-  throw inputError
+  throw _toJSONStringInputError
 }
 
 var QDog = module.exports = function(config) {
   // Instantiate SQS client
-  this.config = config
+  var _this = this
 
-  this.sqs = new AWS.SQS(
-    { accessKeyId: this.config.accessKeyId
-    , secretAccessKey: this.config.secretAccessKey
-    , region: this.config.region
+  _this.config = config
+
+  // validate Config
+  ;['accessKeyId'
+  , 'secretAccessKey'
+  , 'region'
+  , 'queueUrl'
+  ].forEach(function(key) {
+    if( !_this.config[key]) {
+      throw new Error('Missing config for: ' + key)
+    }
+  })
+
+  _this.sqs = new AWS.SQS(
+    { accessKeyId: _this.config.accessKeyId
+    , secretAccessKey: _this.config.secretAccessKey
+    , region: _this.config.region
     , apiVersions: {sqs: '2012-11-05'}
     })
 }
