@@ -3,8 +3,8 @@
 Module used for being a generic abstraction for various Queue backends.
 Currently only supports SQS but intended to support more in the future.
 
-Why qDog may be a bit dog biased but lets be honest, qCat.fetch() just seems
-doomed to failure, and Q-Cat ended pretty badly for RadioShack already.
+The name qDog may be a bit dog biased but lets be honest, qCat.fetch() just
+seems doomed to failure, and Q-Cat ended pretty badly for RadioShack already.
 
 ## Examples
 
