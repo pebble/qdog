@@ -6,6 +6,10 @@ Currently only supports SQS but intended to support more in the future.
 The name qDog may be a bit dog biased but lets be honest, qCat.fetch() just
 seems doomed to failure, and "CueCat" ended pretty badly for RadioShack already.
 
+[![Build Status](https://travis-ci.org/pebble/qdog.svg?branch=master)](https://travis-ci.org/pebble/qdog)
+[![Coverage Status](https://img.shields.io/coveralls/pebble/qdog.svg)](https://coveralls.io/r/pebble/qdog)
+[![npm](http://img.shields.io/npm/v/qdog.svg)](https://www.npmjs.org/package/qdog)
+
 ## Examples
 
 ### Include / Configure
