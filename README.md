@@ -4,7 +4,7 @@ Module used for being a generic abstraction for various Queue backends.
 Currently only supports SQS but intended to support more in the future.
 
 The name qDog may be a bit dog biased but lets be honest, qCat.fetch() just
-seems doomed to failure, and "QueCat" ended pretty badly for RadioShack already.
+seems doomed to failure, and "CueCat" ended pretty badly for RadioShack already.
 
 ## Examples
 
@@ -12,7 +12,7 @@ seems doomed to failure, and "QueCat" ended pretty badly for RadioShack already.
 
 
 ```bash
-npm install git+https://git@github.com/pebble/push-queue.git
+npm install git+https://git@github.com/pebble/qdog.git
 ```
 
 ```js
@@ -66,8 +66,8 @@ var processError = function(err){
 
 var processMessage = function(message){
   console.log('Got:',message) 
-  pushQueue.delete(message.id)
-  pushQueue.receive().then(processMessage,processError)
+  qDog.drop(message.id)
+  qDog.fetch().then(processMessage,processError)
 }
 
 qDog.fetch().then(processMessage,processError)
