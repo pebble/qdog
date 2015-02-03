@@ -76,8 +76,18 @@ qDog.fetch().then(processMessage,processError)
 
 ## Run Tests
 
+Unit:
+
 ```bash
 npm test
+```
+
+End-To-End:
+
+```bash
+cp .env.sample .env
+vim .env
+mocha tests/e2e/*
 ```
 
 ## Sponsored by
