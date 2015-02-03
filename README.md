@@ -34,12 +34,6 @@ qDog = new QDog(
 qDog.toss({'some':'data'})
 ```
 
-### Drop a message no one cares about anymore.
-
-```js
-qDog.drop(message.id)
-```
-
 ### Fetch a message from the Queue
 
 ```js
@@ -51,10 +45,16 @@ qDog.fetch().then(function(message){
 })
 ```
 
+### Drop a message no one cares about anymore.
+
+```js
+qDog.drop(message.id)
+```
+
 ### Continually poll for new messages
 
 Some queue backends (like SQS) only allow you to do longpolling
-for a short period of time, say 30 seconds. Or to keep pulling new messages
+for a short period of time, say 20 seconds. Or to keep pulling new messages
 as they become available.
 
 In either case you will probably want to have your polling to to keep retrying:
