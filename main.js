@@ -77,10 +77,9 @@ QDog.prototype.toss = function(message) {
   })
 }
 
-QDog.prototype.fetch = function() {
+var promiseCallback = function(resolve, reject) {
   var _this = this
 
-  return new Promise(function PromiseCallback(resolve, reject) {
     var params =
       { QueueUrl: _this.config.queueUrl /* required */
       , AttributeNames: ['All']
@@ -95,22 +94,23 @@ QDog.prototype.fetch = function() {
       }
       else if (!data.Messages) {
         reject()
-      }
-      else { // success
+      } else { // success
         try {
           resolve(
             { id: data.Messages[0].ReceiptHandle
             , body: JSON.parse(data.Messages[0].Body)
             }
           )
-        }
-        catch (e) {
+        } catch (e) {
           reject("Malformed JSON in response message")
         }
       }
     })
 
-  })
+  }
+
+QDog.prototype.fetch = function() {
+  return new Promise(promiseCallback.bind(this))
 }
 
 
