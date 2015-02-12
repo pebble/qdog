@@ -1,7 +1,7 @@
 {
   "name": "qdog",
   "version": "1.0.0",
-  "description": "Module used for adding and reading from SQS and eventually Redis",
+  "description": "SQS with an attitude",
   "main": "main.js",
   "scripts": {
     "test": "mocha test/unit/*"
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/pebble/qdog.git"
   },
-  "author": "",
+  "author": "Web Friends <webteam@getpebble.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/pebble/qdog/issues"

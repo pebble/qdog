@@ -1,6 +1,6 @@
 # qdog
 
-Module used for being a generic abstraction for various Queue backends.
+A generic abstraction for various queue backends.
 Currently only supports SQS but intended to support more in the future.
 
 The name qDog may be a bit dog biased but lets be honest, qCat.fetch() just
@@ -16,11 +16,10 @@ seems doomed to failure, and "CueCat" ended pretty badly for RadioShack already.
 
 
 ```bash
-npm install git+https://git@github.com/pebble/qdog.git
+npm install qdog
 ```
 
 ```js
-
 var QDog = require('qdog')
 
 qDog = new QDog(
