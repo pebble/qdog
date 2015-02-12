@@ -41,7 +41,6 @@ var QDog = module.exports = function(config) {
   // validate Config
   ;['accessKeyId'
   , 'secretAccessKey'
-  , 'region'
   , 'queueUrl'
   ].forEach(function(key) {
     if( !_this.config[key]) {
@@ -52,7 +51,7 @@ var QDog = module.exports = function(config) {
   _this.sqs = new AWS.SQS(
     { accessKeyId: _this.config.accessKeyId
     , secretAccessKey: _this.config.secretAccessKey
-    , region: _this.config.region
+    , region: _this.config.queueUrl.split('.')[1]
     , apiVersions: {sqs: '2012-11-05'}
     })
 }

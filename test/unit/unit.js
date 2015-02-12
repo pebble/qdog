@@ -9,7 +9,6 @@ var Promise = require('es6-promise').Promise
 var testConfig =
   { accessKeyId : 'testAccessID'
   , secretAccessKey : 'testSecretKey'
-  , region : 'testRegion'
   , queueUrl : 'testQueueURL'
   }
 

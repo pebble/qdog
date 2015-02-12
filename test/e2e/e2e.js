@@ -3,13 +3,11 @@
 require('dotenv').load()
 
 var assert = require('assert')
-var expect = require('expect')
 var QDog = require('../../main.js')
 
 var qDog = new QDog(
   { accessKeyId: process.env.ACCESS_KEY_ID
   , secretAccessKey: process.env.SECRET_ACCESS_KEY
-  , region: process.env.REGION
   , queueUrl: process.env.SQS_QUEUE_URL
   })
 
