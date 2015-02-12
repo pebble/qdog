@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/pebble/qdog",
   "dependencies": {
-    "aws-sdk": "2.1.7",
+    "aws-sdk": "^2.1.10",
     "es6-promise": "2.0.1"
   },
   "devDependencies": {
