@@ -92,7 +92,7 @@ var promiseCallback = function(resolve, reject) {
         reject(err)
       }
       else if (!data.Messages) {
-        reject()
+        resolve(null)
       } else { // success
         try {
           resolve(

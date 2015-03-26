@@ -131,6 +131,10 @@ describe('qDog', function() {
         ]
       }
 
+    var inputDataEmpty =
+      {
+      }
+
     var resolveData =
         { id: 'abc1234'
         , body: {test: 'data'}
@@ -150,6 +154,21 @@ describe('qDog', function() {
         .catch(function(data) {
           assert.equal(data, "Malformed JSON in response message")
           done()
+        })
+
+    })
+
+    it('should resolve with null if no messages are available', function(done) {
+
+      stub.callsArgWith(1, null, inputDataEmpty)
+
+      qDog.fetch()
+        .then(function(data) {
+          assert.equal(data, null)
+          done()
+        })
+        .catch(function(err) {
+          done(new Error(err))
         })
 
     })
