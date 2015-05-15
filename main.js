@@ -56,12 +56,27 @@ var QDog = module.exports = function(config) {
     })
 }
 
+/**
+ * Add a message to the queue.
+ *
+ * @param {Object} message
+ * @param {Object} [options]
+ * @param {number} [options.delaySeconds] - delay
+ *   processing of the message for this number of seconds;
+ *   max 900 for SQS queues
+ */
+QDog.prototype.toss = function(message, options) {
+  options = options || {};
 
-QDog.prototype.toss = function(message) {
+  var delaySeconds = options.delaySeconds || 0;
+
+  if (delaySeconds < 0) throw new Error('invalid delaySeconds');
+
   var _this = this
   var params =
     { MessageBody: _toJSONString(message)
       , QueueUrl: _this.config.queueUrl
+      , DelaySeconds: delaySeconds
     }
 
   return new Promise(function postPromise(resolve, reject) {
