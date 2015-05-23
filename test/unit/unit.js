@@ -106,6 +106,12 @@ describe('qDog', function() {
         })
     })
 
+    it('should throw if delaySeconds is negative', function() {
+      assert.throws(function() {
+        qDog.toss({}, {delaySeconds: -1})
+      })
+    })
+
     var resolveData = {success: 'data'}
 
     promiseTest('toss', stub, resolveData, resolveData, {error: 'data'})
