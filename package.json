@@ -1,6 +1,6 @@
 {
   "name": "qdog",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "SQS with an attitude",
   "main": "main.js",
   "scripts": {

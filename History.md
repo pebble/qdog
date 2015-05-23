@@ -1,4 +1,9 @@
 
+1.2.0 / 2015-05-22
+==================
+
+  * Add options parameter to toss(); add options.delaySeconds
+
 1.1.0 / 2015-03-26
 ==================
 

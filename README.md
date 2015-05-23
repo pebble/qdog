@@ -36,6 +36,12 @@ qDog = new QDog(
 qDog.toss({'some':'data'})
 ```
 
+#### With a delay
+
+```js
+qDog.toss({'some':'data'}, {delaySeconds: 120})
+```
+
 ### Fetch a message from the Queue
 
 ```js
