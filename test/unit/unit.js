@@ -55,16 +55,17 @@ var promiseTest = function(method, stub, inputData, resolveData, errorData) {
 describe('qDog', function() {
 
   describe('constructor', function() {
+    it('throws if queueUrl is missing', function() {
+      assert.throws(function() {
+        new QDog({})
+      })
+    })
 
-    it('throws if config is incomplete', function() {
-      Object.keys(testConfig).forEach(function(key) {
-        var oldVal = testConfig[key]
-        delete testConfig[key]
-        assert.throws(function() {
-          new QDog(testConfig)
+    it('does not throw if no accessKeyId is provided', function() {
+      assert.doesNotThrow(function() {
+        new QDog({
+          queueUrl: testConfig.queueUrl
         })
-        // restore old value to testConfig
-        testConfig[key] = oldVal
       })
     })
 
