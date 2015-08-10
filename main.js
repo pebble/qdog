@@ -38,15 +38,9 @@ var QDog = module.exports = function(config) {
 
   _this.config = config
 
-  // validate Config
-  ;['accessKeyId'
-  , 'secretAccessKey'
-  , 'queueUrl'
-  ].forEach(function(key) {
-    if( !_this.config[key]) {
-      throw new Error('Missing config for: ' + key)
-    }
-  })
+  if (!this.config.queueUrl) {
+    throw new Error('no queue url');
+  }
 
   _this.sqs = new AWS.SQS(
     { accessKeyId: _this.config.accessKeyId
