@@ -1,202 +1,200 @@
-'use strict'
+'use strict';
 
-var assert = require('assert')
-var expect = require('expect')
-var QDog = require('../../main.js')
-var sinon = require('sinon')
-var Promise = require('es6-promise').Promise
+var assert = require('assert');
+var QDog = require('../../main.js');
+var sinon = require('sinon');
+var Promise = require('es6-promise').Promise;
 
-var testConfig =
-  { accessKeyId : 'testAccessID'
-  , secretAccessKey : 'testSecretKey'
-  , queueUrl : 'testQueueURL'
-  }
+var testConfig = {
+  accessKeyId: 'testAccessID',
+  secretAccessKey: 'testSecretKey',
+  queueUrl: 'testQueueURL'
+};
 
-var qDog = new QDog(testConfig)
+var qDog = new QDog(testConfig);
 
-var promiseTest = function(method, stub, inputData, resolveData, errorData) {
+var promiseTest = function(arg) {
+  var method = arg.method;
+  var stub = arg.stub;
+  var inputData = arg.inputData;
+  var resolveData = arg.resolveData;
+  var errorData = arg.errorData;
 
   it('should return a promise', function() {
-    assert(qDog[method]({good: "object"}) instanceof Promise)
-  })
+    assert(qDog[method]({ good: 'object' }) instanceof Promise);
+  });
 
   it('should resolve the promise after success', function(done) {
-
-    stub.callsArgWith(1, null, inputData)
+    stub.callsArgWith(1, null, inputData);
 
     qDog[method]({some: 'message'})
-      .then(function(data) {
-        assert.deepEqual(data, resolveData)
-        done()
-      })
-      .catch(function() {
-        done("Expected resolve, Got reject")
-      })
-  })
+    .then(function(data) {
+      assert.deepEqual(data, resolveData);
+      done();
+    })
+    .catch(function() {
+      done(new Error('Expected resolve, Got reject'));
+    });
+  });
 
   it('should reject the promise after failure', function(done) {
-
-    stub.callsArgWith(1, errorData, null)
+    stub.callsArgWith(1, errorData, null);
 
     qDog[method]({some: 'message'})
-      .then(function() {
-        done("Expected reject, Got resolve")
-      })
-      .catch(function(data) {
-        assert.deepEqual(data, errorData)
-        done()
-      })
-  })
-
-}
-
-// -----------------------------------------------------------------------------
+    .then(function() {
+      done('Expected reject, Got resolve');
+    })
+    .catch(function(data) {
+      assert.deepEqual(data, errorData);
+      done();
+    });
+  });
+};
 
 describe('qDog', function() {
-
   describe('constructor', function() {
     it('throws if queueUrl is missing', function() {
       assert.throws(function() {
-        new QDog({})
-      })
-    })
+        new QDog({}); // eslint-disable-line no-new
+      });
+    });
 
     it('does not throw if no accessKeyId is provided', function() {
       assert.doesNotThrow(function() {
-        new QDog({
+        new QDog({ // eslint-disable-line no-new
           queueUrl: testConfig.queueUrl
-        })
-      })
-    })
+        });
+      });
+    });
 
     it('does not throw if all config keys are provided', function() {
       assert.doesNotThrow(function() {
-        new QDog(testConfig)
-      })
-    })
-  })
-
-  // ---------------------------------------------------------------------------
+        new QDog(testConfig); // eslint-disable-line no-new
+      });
+    });
+  });
 
   // stub out AWS SQS SDK
-  var stub = sinon.stub(qDog.sqs, 'sendMessage')
+  var stub = sinon.stub(qDog.sqs, 'sendMessage');
 
   describe('#toss()', function() {
     it('should throw if JSON serializable things are not supplied', function() {
-      [ undefined
-      , function() {}
+      [ undefined,
+        function() {}
       ].forEach(function(badvalue) {
-          assert.throws(function() {
-            qDog.toss(badvalue)
-          })
-        })
-    })
+        assert.throws(function() {
+          qDog.toss(badvalue);
+        });
+      });
+    });
 
     it('should not throw if JSON serializable things are supplied', function() {
-      [ 1234
-      , 'some string'
-      , null
-      , '{ "good": "strings" }'
-      , {good: "object"}
-      , ["strings", "in array"]
-      , '["string", "array"]'
+      [ 1234,
+        'some string',
+        null,
+        '{ "good": "strings" }',
+        { good: 'object' },
+        [ 'strings', 'in array' ],
+        '["string", "array"]'
       ].forEach(function(goodvalue) {
-          assert.doesNotThrow(function() {
-            qDog.toss(goodvalue)
-          })
-        })
-    })
+        assert.doesNotThrow(function() {
+          qDog.toss(goodvalue);
+        });
+      });
+    });
 
     it('should throw if delaySeconds is negative', function() {
       assert.throws(function() {
-        qDog.toss({}, {delaySeconds: -1})
-      })
-    })
+        qDog.toss({}, { delaySeconds: -1 });
+      });
+    });
 
-    var resolveData = {success: 'data'}
+    var resolveData = { success: 'data' };
 
-    promiseTest('toss', stub, resolveData, resolveData, {error: 'data'})
+    promiseTest({
+      method: 'toss',
+      stub: stub,
+      inputData: resolveData,
+      resolveData: resolveData,
+      errorData: { error: 'data' }
+    });
 
     after(function() {
-      qDog.sqs.sendMessage.restore()
-    })
-
-  })
-
-  // ---------------------------------------------------------------------------
+      qDog.sqs.sendMessage.restore();
+    });
+  });
 
   describe('#fetch()', function() {
+    var stub = sinon.stub(qDog.sqs, 'receiveMessage');
 
-    var stub = sinon.stub(qDog.sqs, 'receiveMessage')
+    var inputData = {
+      Messages: [{
+        ReceiptHandle: 'abc1234',
+        Body: '{"test": "data"}'
+      }]
+    };
 
-    var inputData =
-      { Messages:
-        [
-          { ReceiptHandle: 'abc1234'
-          , Body: '{"test": "data"}'
-          }
-        ]
-      }
+    var inputDataEmpty = {};
 
-    var inputDataEmpty =
-      {
-      }
+    var resolveData = {
+      id: 'abc1234',
+      body: { test: 'data' }
+    };
 
-    var resolveData =
-        { id: 'abc1234'
-        , body: {test: 'data'}
-        }
-
-    promiseTest('fetch', stub, inputData, resolveData, {error: 'data'})
+    promiseTest({
+      method: 'fetch',
+      stub: stub,
+      inputData: inputData,
+      resolveData: resolveData,
+      errorData: { error: 'data' }
+    });
 
     it('should reject for malformed message data', function(done) {
-
-      inputData.Messages[0].Body = 'bad {JSON'
-      stub.callsArgWith(1, null, inputData)
+      inputData.Messages[0].Body = 'bad {JSON';
+      stub.callsArgWith(1, null, inputData);
 
       qDog.fetch()
-        .then(function() {
-          done("Expected reject, Got resolve")
-        })
-        .catch(function(data) {
-          assert.equal(data, "Malformed JSON in response message")
-          done()
-        })
-
-    })
+      .then(function() {
+        done('Expected reject, Got resolve');
+      })
+      .catch(function(data) {
+        assert.equal(data, 'Malformed JSON in response message');
+        done();
+      });
+    });
 
     it('should resolve with null if no messages are available', function(done) {
-
-      stub.callsArgWith(1, null, inputDataEmpty)
+      stub.callsArgWith(1, null, inputDataEmpty);
 
       qDog.fetch()
-        .then(function(data) {
-          assert.equal(data, null)
-          done()
-        })
-        .catch(function(err) {
-          done(new Error(err))
-        })
+      .then(function(data) {
+        assert.equal(data, null);
+        done();
+      })
+      .catch(function(err) {
+        done(new Error(err));
+      });
 
-    })
+    });
 
     after(function() {
-      qDog.sqs.receiveMessage.restore()
-    })
-
-  })
+      qDog.sqs.receiveMessage.restore();
+    });
+  });
 
   describe('#drop()', function() {
+    var stub = sinon.stub(qDog.sqs, 'deleteMessage');
 
-    var stub = sinon.stub(qDog.sqs, 'deleteMessage')
-
-    promiseTest('drop', stub, 'abc1234', undefined, {error: 'data'})
+    promiseTest({
+      method: 'drop',
+      stub: stub,
+      inputData: 'abc1234',
+      resolveData: undefined,
+      errorData: { error: 'data' }
+    });
 
     after(function() {
-      qDog.sqs.deleteMessage.restore()
-    })
-
-  })
-
-
-})
+      qDog.sqs.deleteMessage.restore();
+    });
+  });
+});
