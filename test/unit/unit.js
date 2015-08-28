@@ -210,5 +210,14 @@ describe('toJSONString', function() {
       }, /Invalid Input/);
       done();
     });
+
+    if (typeof Symbol === 'function') {
+      it('a Symbol is passed', function(done) {
+        assert.throws(function() {
+          toJSONString(Symbol('hi'));
+        }, /Invalid Input/);
+        done();
+      });
+    }
   });
 });

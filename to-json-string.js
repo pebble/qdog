@@ -9,7 +9,8 @@ var toJSONStringInputError = new Error(
 
 function toJSONString(input) {
   if (input === undefined ||
-      typeof input === 'function') {
+      typeof input === 'function' ||
+      typeof input === 'symbol') {
     throw toJSONStringInputError;
   }
 
