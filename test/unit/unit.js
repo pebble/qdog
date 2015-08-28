@@ -4,6 +4,7 @@ var assert = require('assert');
 var QDog = require('../../main.js');
 var sinon = require('sinon');
 var Promise = require('es6-promise').Promise;
+var toJSONString = require('../../to-json-string');
 
 var testConfig = {
   accessKeyId: 'testAccessID',
@@ -195,6 +196,19 @@ describe('qDog', function() {
 
     after(function() {
       qDog.sqs.deleteMessage.restore();
+    });
+  });
+});
+
+describe('toJSONString', function() {
+  describe('throws when', function() {
+    it('an object is passed', function(done) {
+      assert.throws(function() {
+        var recursive = {};
+        recursive.recursive = recursive;
+        toJSONString(recursive);
+      }, /Invalid Input/);
+      done();
     });
   });
 });

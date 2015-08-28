@@ -8,27 +8,27 @@ var toJSONStringInputError = new Error(
 );
 
 function toJSONString(input) {
-  if (input === undefined || typeof input === 'function') {
+  if (input === undefined ||
+      typeof input === 'function') {
     throw toJSONStringInputError;
   }
 
   // test if valid JSON string
   if (typeof input === 'string') {
     try {
-      // we have a valid JSON string already
       JSON.parse(input);
+
+      // we have a valid JSON string already
       return input;
+
     } catch (e) {
-      // must be a raw string value
+      // raw string value like "hello" or "{ "
     }
   }
 
-  // if we got this far then we must be dealing with either an object or a number
   try {
     return JSON.stringify(input);
   } catch (e) {
     throw toJSONStringInputError;
   }
-
-  throw toJSONStringInputError;
 }
