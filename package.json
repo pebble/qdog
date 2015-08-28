@@ -4,7 +4,7 @@
   "description": "SQS with an attitude",
   "main": "main.js",
   "scripts": {
-    "test": "mocha test/unit/*"
+    "test": "make test"
   },
   "repository": {
     "type": "git",
@@ -18,12 +18,21 @@
   "homepage": "https://github.com/pebble/qdog",
   "dependencies": {
     "aws-sdk": "^2.1.10",
-    "es6-promise": "2.0.1"
+    "es6-promise": "2.0.1",
+    "eslint": "^1.2.0",
+    "eslint-config-pebble": "^1.2.0",
+    "eslint-plugin-standard": "^1.1.0"
   },
   "devDependencies": {
-    "sinon": "^1.12.2",
     "dotenv": "^0.4.0",
     "expect": "^1.4.0",
-    "mocha": "^2.1.0"
+    "istanbul-harmony": "^0.3.16",
+    "mocha": "^2.1.0",
+    "sinon": "^1.12.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "pebble"
+    ]
   }
 }
