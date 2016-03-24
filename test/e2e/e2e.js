@@ -25,9 +25,9 @@ describe('QDog', function() {
     it('should fetch the item from the SQS queue', function(done) {
       qDog.fetch()
       .then(function(data) {
-        assert(data.id);
-        assert.deepEqual(data.body, testData);
-        messageId = data.id;
+        assert(data[0].id);
+        assert.deepEqual(data[0].body, testData);
+        messageId = data[0].id;
         done();
       });
     });

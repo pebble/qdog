@@ -61,7 +61,7 @@ var promiseCallback = function(resolve, reject) {
   var params = {
     QueueUrl: self.config.queueUrl, /* required */
     AttributeNames: ['All'],
-    MaxNumberOfMessages: 1,
+    MaxNumberOfMessages: self.config.maxMessages || 1,
     WaitTimeSeconds: 20
   };
 
@@ -72,18 +72,24 @@ var promiseCallback = function(resolve, reject) {
     }
 
     if (!data.Messages) {
-      resolve(null);
+      resolve([]);
       return;
     }
 
+    var msgs;
     try {
-      resolve({
-        id: data.Messages[0].ReceiptHandle,
-        body: JSON.parse(data.Messages[0].Body)
+      msgs = data.Messages.map(function(msg) {
+        return {
+          id: msg.ReceiptHandle,
+          body: JSON.parse(msg.Body)
+        };
       });
-    } catch (e) {
-      reject('Malformed JSON in response message');
+    } catch (_) {
+      reject(new Error('Malformed JSON in response message'));
+      return;
     }
+
+    resolve(msgs);
   });
 };
 
