@@ -33,9 +33,7 @@ var promiseTest = function(arg) {
       assert.deepEqual(data, resolveData);
       done();
     })
-    .catch(function() {
-      done(new Error('Expected resolve, Got reject'));
-    });
+    .catch(done);
   });
 
   it('should reject the promise after failure', function(done) {
@@ -128,6 +126,10 @@ describe('qDog', function() {
   describe('#fetch()', function() {
     var stub = sinon.stub(qDog.sqs, 'receiveMessage');
 
+    after(function() {
+      qDog.sqs.receiveMessage.restore();
+    });
+
     var inputData = {
       Messages: [{
         ReceiptHandle: 'abc1234',
@@ -137,10 +139,10 @@ describe('qDog', function() {
 
     var inputDataEmpty = {};
 
-    var resolveData = {
+    var resolveData = [{
       id: 'abc1234',
       body: { test: 'data' }
-    };
+    }];
 
     promiseTest({
       method: 'fetch',
@@ -158,28 +160,63 @@ describe('qDog', function() {
       .then(function() {
         done('Expected reject, Got resolve');
       })
-      .catch(function(data) {
-        assert.equal(data, 'Malformed JSON in response message');
+      .catch(function(err) {
+        assert.equal(err.message, 'Malformed JSON in response message');
         done();
       });
     });
 
-    it('should resolve with null if no messages are available', function(done) {
+    it('should resolve with [] if no messages are available', function(done) {
       stub.callsArgWith(1, null, inputDataEmpty);
 
       qDog.fetch()
       .then(function(data) {
-        assert.equal(data, null);
+        assert.deepEqual(data, []);
         done();
       })
-      .catch(function(err) {
-        done(new Error(err));
-      });
-
+      .catch(done);
     });
 
-    after(function() {
-      qDog.sqs.receiveMessage.restore();
+    describe('when configured with maxMessages', function() {
+      function testMaxMessages(num) {
+        var dog;
+        var params;
+
+        var config = {
+          accessKeyId: 'testAccessID',
+          secretAccessKey: 'testSecretKey',
+          queueUrl: 'testQueueURL',
+          maxMessages: num
+        };
+
+        before(function() {
+          dog = new QDog(config);
+          sinon.stub(dog.sqs, 'receiveMessage', function(prms, cb) {
+            params = prms;
+            cb(null, {});
+          });
+        });
+
+        after(function() {
+          dog.sqs.receiveMessage.restore();
+        });
+
+        it('passes MaxNumberOfMessages: ' + num + ' to sqs', function(done) {
+          dog.fetch().then(check).catch(done);
+          function check() {
+            assert.equal(params.MaxNumberOfMessages, config.maxMessages);
+            done();
+          }
+        });
+      }
+
+      describe('set to 1', function() {
+        testMaxMessages(1);
+      });
+
+      describe('set to 2', function() {
+        testMaxMessages(2);
+      });
     });
   });
 

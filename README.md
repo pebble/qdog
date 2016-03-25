@@ -1,7 +1,6 @@
 # qdog
 
-A generic abstraction for various queue backends.
-Currently only supports SQS but intended to support more in the future.
+A tiny abstraction for working with [SQS](https://aws.amazon.com/sqs/).
 
 The name qDog may be a bit dog biased but lets be honest, qCat.fetch() just
 seems doomed to failure, and "CueCat" ended pretty badly for RadioShack already.
@@ -20,66 +19,65 @@ npm install qdog
 ```
 
 ```js
-var QDog = require('qdog')
+const QDog = require('qdog');
 
-qDog = new QDog(
-  { accessKeyId: process.env.ACCESS_KEY_ID
-  , secretAccessKey: process.env.SECRET_ACCESS_KEY
-  , queueUrl: process.env.SQS_QUEUE_URL
-  }
-)
+const qDog = new QDog({
+  accessKeyId: process.env.ACCESS_KEY_ID,
+  secretAccessKey: process.env.SECRET_ACCESS_KEY,
+  queueUrl: process.env.SQS_QUEUE_URL,
+  maxMessages: 10 // number of messages to read from SQS, default is 1
+});
 ```
 
 ### Toss a message into the Queue
 
 ```js
-qDog.toss({'some':'data'})
+qDog.toss({'some':'data'});
 ```
 
 #### With a delay
 
 ```js
-qDog.toss({'some':'data'}, {delaySeconds: 120})
+qDog.toss({'some':'data'}, {delaySeconds: 120});
 ```
 
-### Fetch a message from the Queue
+### Fetch messages from the queue
 
 ```js
-qDog.fetch().then(function(message){
-  console.log('Got:',message.body) 
-  qDog.drop(message.id)
-},function(err){
-  if (err) throw err
-})
+qDog.fetch().then(function(messages) {
+  assert(Array.isArray(messages)); // true
+
+  console.log('Got:', messages[0].body);
+  qDog.drop(message[0].id);
+
+},function(err) {
+  if (err) throw err;
+});
 ```
 
 ### Drop a message no one cares about anymore.
 
 ```js
-qDog.drop(message.id)
+qDog.drop(message.id);
 ```
 
 ### Continually poll for new messages
 
-Some queue backends (like SQS) only allow you to do longpolling
-for a short period of time, say 20 seconds. Or to keep pulling new messages
-as they become available.
-
-In either case you will probably want to have your polling to to keep retrying:
+SQS is a pull based queue. A common usage pattern to process
+new incoming messages is to use a retry loop. For example:
 
 ```js
-var processError = function(err){
+var processError = function(err) {
   if (err) throw err;
 }
 
-var processMessage = function(message){
-  console.log('Got:',message) 
-  qDog.drop(message.id)
-  qDog.fetch().then(processMessage,processError)
+var processMessages = function(messages) {
+  console.log('Got:',messages);
+  qDog.drop(messages[0].id);
+  qDog.fetch().then(processMessage, processError);
 }
 
-qDog.fetch().then(processMessage,processError)
-
+qDog.fetch().then(processMessages, processError);
 ```
 
 ## Run Tests
@@ -100,8 +98,8 @@ mocha tests/e2e/*
 
 ## Sponsored by
 
-[Pebble Technology!](https://getpebble.com)
+[Pebble Technology!](https://www.pebble.com)
 
 ## License
 
-[MIT](https://github.com/pebble/qdog/blob/master/LICENSE)
+[MIT](/LICENSE)
